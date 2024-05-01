@@ -1,0 +1,711 @@
+version 2
+run General-0-20240429-15:09:37-1420
+attr configname General
+attr datetime 20240429-15:09:37
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network pocSimulation
+attr processid 1420
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param **.numHosts 20
+param **.residualEnergy 100J
+param **.slotTime 0s
+param **.txRate 9.6kbps
+param **.pkLenBits 952b
+param **.x "uniform(0m, SbWidth)"
+param **.y "uniform(0m, SbHeight)"
+param **.animationHoldTimeOnCollision 0s
+param **.idleAnimationSpeed 1
+param **.transmissionEdgeAnimationSpeed 1e-6
+param **.midTransmissionAnimationSpeed 1e-1
+param **.iaTime exponential(2s)
+param **.SbWidth 1700m
+param **.SbHeight 1200m
+param **.hostMemorySize 100
+param **.sink1.sinkX SbWidth/4
+param **.sink1.sinkY SbHeight/4
+param **.sink2.sinkX 3*SbWidth/4
+param **.sink2.sinkY SbHeight/4
+param **.sink3.sinkX SbWidth/4
+param **.sink3.sinkY 3*SbHeight/4
+param **.sink4.sinkX 3*SbWidth/4
+param **.sink4.sinkY 3*SbHeight/4
+param **.sinkID 0
+param **.host[*].numbPacketToSend "intuniform(3, 6)"
+
+scalar pocSimulation.sink1 duration 0.099170222132
+statistic pocSimulation.sink1 collisionLength:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr title "collision length, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink1 collisionLength:mean nan
+attr title "collision length, mean"
+scalar pocSimulation.sink1 collisionLength:sum 0
+attr title "collision length, sum"
+scalar pocSimulation.sink1 collisionLength:max nan
+attr title "collision length, max"
+statistic pocSimulation.sink1 collisionMultiplicity:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr source collision
+attr title "collision multiplicity, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink1 collidedFrames:last nan
+attr source sum(collision)
+attr title "collided frames, last"
+scalar pocSimulation.sink1 channelUtilization:last nan
+attr interpolationmode linear
+attr source timeavg(receive)
+attr title "channel utilization, last"
+scalar pocSimulation.sink1 receivedFrames:last 0
+attr source sum(receive)
+attr title "received frames, last"
+scalar pocSimulation.sink2 duration 0.099170222132
+statistic pocSimulation.sink2 collisionLength:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr title "collision length, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink2 collisionLength:mean nan
+attr title "collision length, mean"
+scalar pocSimulation.sink2 collisionLength:sum 0
+attr title "collision length, sum"
+scalar pocSimulation.sink2 collisionLength:max nan
+attr title "collision length, max"
+statistic pocSimulation.sink2 collisionMultiplicity:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr source collision
+attr title "collision multiplicity, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink2 collidedFrames:last nan
+attr source sum(collision)
+attr title "collided frames, last"
+scalar pocSimulation.sink2 channelUtilization:last nan
+attr interpolationmode linear
+attr source timeavg(receive)
+attr title "channel utilization, last"
+scalar pocSimulation.sink2 receivedFrames:last 0
+attr source sum(receive)
+attr title "received frames, last"
+scalar pocSimulation.sink3 duration 0.099170222132
+statistic pocSimulation.sink3 collisionLength:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr title "collision length, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink3 collisionLength:mean nan
+attr title "collision length, mean"
+scalar pocSimulation.sink3 collisionLength:sum 0
+attr title "collision length, sum"
+scalar pocSimulation.sink3 collisionLength:max nan
+attr title "collision length, max"
+statistic pocSimulation.sink3 collisionMultiplicity:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr source collision
+attr title "collision multiplicity, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink3 collidedFrames:last nan
+attr source sum(collision)
+attr title "collided frames, last"
+scalar pocSimulation.sink3 channelUtilization:last nan
+attr interpolationmode linear
+attr source timeavg(receive)
+attr title "channel utilization, last"
+scalar pocSimulation.sink3 receivedFrames:last 0
+attr source sum(receive)
+attr title "received frames, last"
+scalar pocSimulation.sink4 duration 0.099170222132
+statistic pocSimulation.sink4 collisionLength:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr title "collision length, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink4 collisionLength:mean nan
+attr title "collision length, mean"
+scalar pocSimulation.sink4 collisionLength:sum 0
+attr title "collision length, sum"
+scalar pocSimulation.sink4 collisionLength:max nan
+attr title "collision length, max"
+statistic pocSimulation.sink4 collisionMultiplicity:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr source collision
+attr title "collision multiplicity, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+scalar pocSimulation.sink4 collidedFrames:last nan
+attr source sum(collision)
+attr title "collided frames, last"
+scalar pocSimulation.sink4 channelUtilization:last nan
+attr interpolationmode linear
+attr source timeavg(receive)
+attr title "channel utilization, last"
+scalar pocSimulation.sink4 receivedFrames:last 0
+attr source sum(receive)
+attr title "received frames, last"
+statistic pocSimulation.host[0] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[0] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[1] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[1] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[2] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[2] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[3] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[3] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[4] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[4] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[5] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[5] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[6] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[6] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[7] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[7] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[8] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[8] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[9] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[9] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[10] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[10] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[11] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[11] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[12] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[12] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[13] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[13] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[14] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[14] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[15] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[15] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[16] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[16] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[17] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[17] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[18] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[18] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+statistic pocSimulation.host[19] hopCount:stats
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, stats"
+statistic pocSimulation.host[19] hopCount:histogram
+field count 0
+field mean nan
+field stddev nan
+field min nan
+field max nan
+field sum 0
+field sqrsum 0
+attr interpolationmode none
+attr source arrival
+attr title "hop count, histogram"
+bin	-inf	0
+bin	0	0
+bin	1	0
+

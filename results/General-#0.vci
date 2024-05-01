@@ -1,0 +1,164 @@
+file 4667 1714399808                                            
+version 2
+run General-0-20240429-15:09:37-1420
+attr configname General
+attr datetime 20240429-15:09:37
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsf ""
+attr measurement ""
+attr network pocSimulation
+attr processid 1420
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+param **.numHosts 20
+param **.residualEnergy 100J
+param **.slotTime 0s
+param **.txRate 9.6kbps
+param **.pkLenBits 952b
+param **.x "uniform(0m, SbWidth)"
+param **.y "uniform(0m, SbHeight)"
+param **.animationHoldTimeOnCollision 0s
+param **.idleAnimationSpeed 1
+param **.transmissionEdgeAnimationSpeed 1e-6
+param **.midTransmissionAnimationSpeed 1e-1
+param **.iaTime exponential(2s)
+param **.SbWidth 1700m
+param **.SbHeight 1200m
+param **.hostMemorySize 100
+param **.sink1.sinkX SbWidth/4
+param **.sink1.sinkY SbHeight/4
+param **.sink2.sinkX 3*SbWidth/4
+param **.sink2.sinkY SbHeight/4
+param **.sink3.sinkX SbWidth/4
+param **.sink3.sinkY 3*SbHeight/4
+param **.sink4.sinkX 3*SbWidth/4
+param **.sink4.sinkY 3*SbHeight/4
+param **.sinkID 0
+param **.host[*].numbPacketToSend "intuniform(3, 6)"
+
+vector 0 pocSimulation.sink1 serverChannelState:vector ETV
+attr enum IDLE=0,TRANSMISSION=1,COLLISION=2
+attr source channelState
+attr title "Channel state, vector"
+vector 1 pocSimulation.sink2 serverChannelState:vector ETV
+attr enum IDLE=0,TRANSMISSION=1,COLLISION=2
+attr source channelState
+attr title "Channel state, vector"
+vector 2 pocSimulation.sink3 serverChannelState:vector ETV
+attr enum IDLE=0,TRANSMISSION=1,COLLISION=2
+attr source channelState
+attr title "Channel state, vector"
+vector 3 pocSimulation.sink4 serverChannelState:vector ETV
+attr enum IDLE=0,TRANSMISSION=1,COLLISION=2
+attr source channelState
+attr title "Channel state, vector"
+vector 4 pocSimulation.host[0] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 5 pocSimulation.host[1] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 6 pocSimulation.host[2] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 7 pocSimulation.host[3] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 8 pocSimulation.host[4] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 9 pocSimulation.host[5] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 10 pocSimulation.host[6] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 11 pocSimulation.host[7] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 12 pocSimulation.host[8] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 13 pocSimulation.host[9] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 14 pocSimulation.host[10] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 15 pocSimulation.host[11] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 16 pocSimulation.host[12] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 17 pocSimulation.host[13] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 18 pocSimulation.host[14] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 19 pocSimulation.host[15] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 20 pocSimulation.host[16] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 21 pocSimulation.host[17] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 22 pocSimulation.host[18] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+vector 23 pocSimulation.host[19] radioState:vector ETV
+attr enum IDLE=0,TRANSMIT=1
+attr source state
+attr title "Radio state, vector"
+0	4460 8 0 0 0 0 1 0 0 0 0
+1	4468 8 0 0 0 0 1 0 0 0 0
+2	4476 8 0 0 0 0 1 0 0 0 0
+3	4484 8 0 0 0 0 1 0 0 0 0
+4	4492 8 0 0 0 0 1 0 0 0 0
+5	4500 8 0 0 0 0 1 0 0 0 0
+6	4508 8 0 0 0 0 1 0 0 0 0
+7	4516 8 0 0 0 0 1 0 0 0 0
+8	4524 8 0 0 0 0 1 0 0 0 0
+9	4532 8 0 0 0 0 1 0 0 0 0
+10	4540 9 0 0 0 0 1 0 0 0 0
+11	4549 9 0 0 0 0 1 0 0 0 0
+12	4558 9 0 0 0 0 1 0 0 0 0
+13	4567 9 0 0 0 0 1 0 0 0 0
+14	4576 9 0 0 0 0 1 0 0 0 0
+15	4585 9 0 0 0 0 1 0 0 0 0
+16	4594 9 0 0 0 0 1 0 0 0 0
+17	4603 9 0 0 0 0 1 0 0 0 0
+18	4612 9 0 0 0 0 1 0 0 0 0
+19	4621 9 0 0 0 0 1 0 0 0 0
+20	4630 9 0 0 0 0 1 0 0 0 0
+21	4639 9 0 0 0 0 1 0 0 0 0
+22	4648 9 0 0 0 0 1 0 0 0 0
+23	4657 9 0 0 0 0 1 0 0 0 0
+
