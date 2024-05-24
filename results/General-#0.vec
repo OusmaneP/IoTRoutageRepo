@@ -1,14 +1,14 @@
 version 2
-run General-0-20240429-15:09:37-1420
+run General-0-20240524-18:04:06-8390
 attr configname General
-attr datetime 20240429-15:09:37
+attr datetime 20240524-18:04:06
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network pocSimulation
-attr processid 1420
+attr processid 8390
 attr repetition 0
 attr replication #0
 attr resultdir results

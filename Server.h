@@ -6,6 +6,8 @@
 
 #include "pocMsg_m.h"
 #include "ListHostMsg_m.h"
+#include "GraphStructure.h"
+
 using namespace omnetpp;
 
 namespace pocSimulation {
@@ -28,8 +30,12 @@ class Server : public cSimpleModule
     // my params    *********
     std::string sinkName;
     ListHostMsg *listHostMsg;
-    std::map<int, std::string> HostsIdMap;
+    std::map<int, std::string> HostsIdMapExternal;
     std::map<int, std::string> packetsToSendMap;
+    std::list<int> listExternalPackets;
+    GraphStructure graph;
+    GraphStructure graphMultiCanalSink1;
+
 
     cModule *host;
     PocMsg *newMessage;
@@ -62,6 +68,7 @@ class Server : public cSimpleModule
     virtual void finish() override;
     virtual void refreshDisplay() const override;
     virtual bool isIdInList(int id);
+    virtual void mySchduleAt(simtime_t delay, char message[]);
 };
 
 }; //namespace

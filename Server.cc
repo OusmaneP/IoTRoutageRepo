@@ -1,6 +1,7 @@
 
 #include "Server.h"
 
+
 namespace pocSimulation {
 
     Define_Module(Server);
@@ -59,6 +60,7 @@ namespace pocSimulation {
 
 
 
+            // schedule send My ID
             char msgname[] = "sending myID";
             char datas[] = "Ids";
             sprintf(msgname, "sending myID");
@@ -70,8 +72,12 @@ namespace pocSimulation {
             char* datasDiff = (char*)("Diff IDs");
             PocMsg *msgDiffIds = generateMessage(msgnameDiff, getId(), datasDiff);
             simtime_t delayDiff = 0.099170222132;
-
             scheduleAt(simTime()  + delayDiff, msgDiffIds);
+
+            // schedule send External Ids to sink1
+            mySchduleAt(0.099172155333, "WakeUp and Send External Ids to Sink 1");
+
+
         }
 
         void Server::handleMessage(cMessage *msg)
@@ -178,6 +184,27 @@ namespace pocSimulation {
 
 
                 }
+                else if (strcmp("WakeUp and Send External Ids to Sink 1", ttmsg->getMsgContent()) == 0) {
+                    EV << "Waking Up and Send External Ids to Sink 1" << endl;
+
+                    cModule *target = getParentModule()->getSubmodule("sink1");
+
+                    ListHostMsg *listHostMsg;
+                    char msgSendExternalPackets[] = "Sending External Packets Ids to Sink1";
+                    listHostMsg = new ListHostMsg(msgSendExternalPackets);
+                    listHostMsg->setMsgContent(msgSendExternalPackets);
+                    listHostMsg->setSource(getId());
+
+                    listHostMsg->setDatasArraySize(listExternalPackets.size());
+                    int indexArray = 0;
+                    for (auto it = listExternalPackets.begin(); it != listExternalPackets.end(); ++it) {
+                        listHostMsg->setDatas(indexArray, *it);
+                        indexArray++;
+                    }
+
+                    listHostMsg->setDestination(target->getId());
+                    sendDirect(listHostMsg->dup(), target, "in");
+                }
 
                 if (strcmp("sendingId to server", ttmsg->getMsgContent()) == 0){
                     if (numberOfMessagesForInitialization <= numberOfHosts) {
@@ -192,23 +219,76 @@ namespace pocSimulation {
             else if (dynamic_cast<ListHostMsg *>(msg) != nullptr) {
                 ListHostMsg *rcvListHostMsg = check_and_cast<ListHostMsg *>(msg);
 
+                // when sink receive external packets from hosts.
+                if (strcmp("Send External Packets", rcvListHostMsg->getMsgContent()) == 0){
+                    // Get the size of the datas[] array
+                    int arraySize = rcvListHostMsg->getDatasArraySize();
 
-                EV << getName() << " : Received from : " << rcvListHostMsg->getMsgContent() << endl;
+                    // Read all values in the datas[] array and put them in listPackets
+                    for (int i = 0; i < arraySize; ++i) {
+                        int hostId = rcvListHostMsg->getDatas(i);
 
-                if (rcvListHostMsg) {
-                   // Get the size of the datas[] array
-                   int arraySize = rcvListHostMsg->getDatasArraySize();
+                        if(isIdInList(hostId)){
+                            graph.addEdge(rcvListHostMsg->getSource(), hostId);
+                        }else{
+                            listExternalPackets.push_back(hostId);
+                        }
 
-                   // Read all values in the datas[] array and put them in HostsIdMap
-                   for (int i = 0; i < arraySize; ++i) {
-                       int hostId = rcvListHostMsg->getDatas(i);
-                       EV << hostId << " -- ";
-                       HostsIdMap[hostId] = rcvListHostMsg->getMsgContent();
-                   }
-                   EV << endl;
-                } else {
-                   // Handle the case where the message is not of type ListHostMsg
-                   EV << "Received message is not of type ListHostMsg" << endl;
+                    }
+
+                }
+                    // when Receiving External Packets Ids to Sink1
+                else if (strcmp("Sending External Packets Ids to Sink1", rcvListHostMsg->getMsgContent()) == 0){
+                    int arraySize = rcvListHostMsg->getDatasArraySize();
+                    EV << rcvListHostMsg->getSenderModule()->getName() << " Sent for External :: ";
+
+                    // Read all values in the datas[] array and put them in HostsIdMapExternal
+                    for (int i = 0; i < arraySize; ++i) {
+                        int hostId = rcvListHostMsg->getDatas(i);
+                        EV << hostId << " -- ";
+
+                        if(isIdInList(hostId)){
+                            graph.addEdge(getId(), hostId);
+                            graphMultiCanalSink1.addEdge(rcvListHostMsg->getSource(), getId());
+                        }else{
+                            auto it = HostsIdMapExternal.find(hostId);
+
+                            if(it != HostsIdMapExternal.end()){
+
+                                const char *second = it->second.c_str();
+
+                                cModule *module = getParentModule()->getSubmodule(second);
+                                graphMultiCanalSink1.addEdge(rcvListHostMsg->getSource(), module->getId());
+
+                            }
+
+                        }
+
+                    }
+
+
+                    EV << endl;
+                }
+                else{
+
+                    EV << getName() << " : Received from : " << rcvListHostMsg->getMsgContent() << endl;
+
+                    if (rcvListHostMsg) {
+                        // Get the size of the datas[] array
+                        int arraySize = rcvListHostMsg->getDatasArraySize();
+
+                        // Read all values in the datas[] array and put them in HostsIdMapExternal
+                        for (int i = 0; i < arraySize; ++i) {
+                            int hostId = rcvListHostMsg->getDatas(i);
+                            EV << hostId << " -- ";
+                            HostsIdMapExternal[hostId] = rcvListHostMsg->getMsgContent();
+                        }
+                        EV << endl;
+                    } else {
+                        // Handle the case where the message is not of type ListHostMsg
+                        EV << "Received message is not of type ListHostMsg" << endl;
+                    }
+
                 }
             }
         }
@@ -250,8 +330,52 @@ namespace pocSimulation {
             }
         }
 
+        void Server::mySchduleAt(simtime_t delay, char message[]){
+            char datas[] = "Ids";
+            PocMsg *msgToSend = generateMessage(message, getId(), datas);
+            scheduleAt(simTime()  + delay, msgToSend);
+        }
+
         void Server::finish()
         {
+            if (strcmp("sink1", getName()) == 0) {
+
+
+                map<int, list<int>> adjacencyList = graphMultiCanalSink1.getAdjancyList();
+
+                    // Iterate over each node in the adjacency list
+                    for (const auto& pair : adjacencyList) {
+                        int node = pair.first;
+                        const list<int>& neighbors = pair.second;
+
+                        // Print the node and its neighbors
+                        EV << "Node " << node << " neighbors: ";
+                        for (int neighbor : neighbors) {
+                            EV << neighbor << " ";
+                        }
+                        EV << endl;
+                    }
+
+                    graphMultiCanalSink1.DFS(2);
+                    graphMultiCanalSink1.DFS(3);
+                    graphMultiCanalSink1.DFS(4);
+                    graphMultiCanalSink1.DFS(5);
+
+                    list<list<int>> circuitList = graphMultiCanalSink1.getCircuitList();
+
+                    // Iterate over each circuit in the circuit list
+                    for (const auto& circuit : circuitList) {
+                        // Print the circuit
+                        EV << "Circuit: ";
+                        for (int node : circuit) {
+                            EV << node << "-";
+                        }
+                        EV << endl;
+                    }
+
+
+            }
+
             EV << "duration: " << simTime() << endl;
 
             // Log the contents of HostsIdList using EV
@@ -262,7 +386,7 @@ namespace pocSimulation {
 
             EV << endl;
 
-            for (auto it = HostsIdMap.begin(); it != HostsIdMap.end(); ++it) {
+            for (auto it = HostsIdMapExternal.begin(); it != HostsIdMapExternal.end(); ++it) {
                 int key = it->first;
                 std::string value = it->second;
                 // Do something with the key and value

@@ -11,6 +11,8 @@
 #include<iostream>
 #include<list>
 #include<map>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 class GraphStructure {
@@ -18,6 +20,8 @@ class GraphStructure {
     map<int, list<int>> adjacencyList;
     list<list<int>> circuitList; //The list of circuits
     list<int> circuit; // one circuit
+
+
 
     public:
         GraphStructure();
@@ -27,6 +31,8 @@ class GraphStructure {
         void DFS(int startNode);
         map<int, list<int>> getAdjancyList();
         list<list<int>> getCircuitList();
+
+
 };
 
 #endif /* GRAPHSTRUCTURE_H_ */

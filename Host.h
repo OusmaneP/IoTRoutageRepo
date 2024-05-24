@@ -77,6 +77,7 @@ class Host : public cSimpleModule
     virtual void getAllHostsIdList();
     virtual int getValueAtIndex(int index);
     virtual void showPacketsToSend();
+    virtual void mySchduleAt(simtime_t delay, char message[]);
 };
 
 }; //namespace

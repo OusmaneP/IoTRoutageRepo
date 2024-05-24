@@ -21,6 +21,7 @@ void GraphStructure::addEdge(int node1, int node2) {
 }
 
 void GraphStructure::DFS(int startNode) {
+
     visitedNodes[startNode] = true;
 
     circuit.push_back(startNode);
@@ -52,4 +53,5 @@ void GraphStructure::addAllNodeEdges(int node1, list<int> edges) {
 list<list<int>> GraphStructure::getCircuitList() {
     return this->circuitList;
 }
+
 

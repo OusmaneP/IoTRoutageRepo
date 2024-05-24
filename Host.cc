@@ -75,6 +75,7 @@ void Host::initialize()
     generatePacketsToSend();
     showPacketsToSend();
 
+
 }
 
 void Host::handleMessage(cMessage *msg)
@@ -110,6 +111,30 @@ void Host::handleMessage(cMessage *msg)
             PocMsg *msgACK = generateMessage(msgname, mySinkId);
 
             sendDirect(msgACK, target, "in");
+
+            mySchduleAt(0.000002088425, "WakeUp and Send External Packets");
+
+        }
+        else if (strcmp("WakeUp and Send External Packets", ttmsg->getMsgContent()) == 0){
+            EV << "Waking up to send external packets " << endl;
+
+            cModule *target = getParentModule()->getSubmodule(sinkName);
+
+            ListHostMsg *listHostMsg;
+            char msgSendExternalPackets[] = "Send External Packets";
+            listHostMsg = new ListHostMsg(msgSendExternalPackets);
+            listHostMsg->setMsgContent(msgSendExternalPackets);
+            listHostMsg->setSource(getId());
+
+            listHostMsg->setDatasArraySize(listOfPacketToSend.size());
+            int indexArray = 0;
+            for (auto it = listOfPacketToSend.begin(); it != listOfPacketToSend.end(); ++it) {
+                 listHostMsg->setDatas(indexArray, *it);
+                 indexArray++;
+            }
+
+            listHostMsg->setDestination(mySinkId);
+            sendDirect(listHostMsg->dup(), target, "in");
         }
         else {
             throw cRuntimeError("invalid state");
@@ -328,6 +353,11 @@ int Host::getValueAtIndex(int index){
     std::advance(id, index);
 
     return *id;
+}
+
+void Host::mySchduleAt(simtime_t delay, char message[]){
+    PocMsg *msgToSend = generateMessage(message, getId());
+    scheduleAt(simTime()  + delay, msgToSend);
 }
 
 void Host::finish()
