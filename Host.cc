@@ -76,6 +76,9 @@ void Host::initialize()
     showPacketsToSend();
 
 
+    // schedule each node for internal routing. 0.099172155755
+    mySchduleAt(0.099172155844, "WakeUp each node in cluster to route internal");
+
 }
 
 void Host::handleMessage(cMessage *msg)
@@ -86,7 +89,7 @@ void Host::handleMessage(cMessage *msg)
         getParentModule()->getCanvas()->setAnimationSpeed(transmissionEdgeAnimationSpeed, this);
         PocMsg *ttmsg = check_and_cast<PocMsg *>(msg);
         if (strcmp("Sending my LeaderID", ttmsg->getMsgContent()) == 0){
-            EV<< "I received this ID from " << ttmsg->getSource() << "\n";
+            EV<< "Received sink ID : " << ttmsg->getSource() << "\n";
 
             // save sink Id and Name
             mySinkId = ttmsg->getSource();
@@ -136,6 +139,25 @@ void Host::handleMessage(cMessage *msg)
             listHostMsg->setDestination(mySinkId);
             sendDirect(listHostMsg->dup(), target, "in");
         }
+        else if (strcmp("WakeUp each node in cluster to route internal", ttmsg->getMsgContent()) == 0) {
+            EV << getName() << " Woke up for internal Routing " << endl;
+
+            if(!quintupletsListEmission.empty()){
+                for (auto& quintuplet : quintupletsListEmission) {
+                    // schedule a wake up to rout an external packet
+                    int nodeReceiverId = getValueAtListPosition(quintuplet, 1);
+                    int slot = getValueAtListPosition(quintuplet, 2);
+
+                    EV << getName() << " will send packet to " << nodeReceiverId << endl;
+                    simtime_t routDelay = 0.000000000002 * slot;
+                    char message[] = "message route one packet to a node";
+                    mySchduleRountAPacketAt(routDelay , message, nodeReceiverId, nodeReceiverId);
+                }
+            }
+        }
+        else if (strcmp("message route one packet to a node", ttmsg->getMsgContent()) == 0) {
+            sendOnePacketToNode(ttmsg->getDestination(), ttmsg->getSource());
+        }
         else {
             throw cRuntimeError("invalid state");
         }
@@ -145,19 +167,85 @@ void Host::handleMessage(cMessage *msg)
     else if (dynamic_cast<ListHostMsg *>(msg) != nullptr) {
         ListHostMsg *rcvListHostMsg = check_and_cast<ListHostMsg *>(msg);
 
-        if (rcvListHostMsg) {
-           // Get the size of the datas[] array
-           int arraySize = rcvListHostMsg->getDatasArraySize();
+        // when receive one packet from a node
+        if (strcmp("Sending 1 packet to node", rcvListHostMsg->getMsgContent()) == 0) {
+            EV << getName() << " Id : " << getId() << " Received one packet " << rcvListHostMsg->getDestination() << " from node : " << rcvListHostMsg->getSource() << endl;
+            packetsReceivedList.push_back(rcvListHostMsg->getDestination());
 
-           // Read all values in the datas[] array and put them in List Neighbor HostsId
-           for (int i = 0; i < arraySize; ++i) {
-               int hostId = rcvListHostMsg->getDatas(i);
-               hostNeighborsIdList.push_back(hostId);
-           }
-        } else {
-            // Handle the case where the message is not of type ListHostMsg
-            EV << "Received message is not of type ListHostMsg" << endl;
         }
+        // when receive one packet from a sink
+        if (strcmp("Sending 1 packet to destination sink", rcvListHostMsg->getMsgContent()) == 0) {
+            EV << getName() << " Id : " << getId() << " Received one packet " << rcvListHostMsg->getDestination() << " from sink : " << rcvListHostMsg->getSource() << endl;
+            packetsReceivedList.push_back(rcvListHostMsg->getDestination());
+        }
+        else{
+            if (rcvListHostMsg) {
+               // Get the size of the datas[] array
+               int arraySize = rcvListHostMsg->getDatasArraySize();
+
+               // Read all values in the datas[] array and put them in List Neighbor HostsId
+               for (int i = 0; i < arraySize; ++i) {
+                   int hostId = rcvListHostMsg->getDatas(i);
+                   hostNeighborsIdList.push_back(hostId);
+               }
+            } else {
+                // Handle the case where the message is not of type ListHostMsg
+                EV << "Received message is not of type ListHostMsg" << endl;
+            }
+        }
+
+    }
+    // Check if msg is of type List Quintuplets Msg
+    else if (dynamic_cast<ListQuintMsg *>(msg) != nullptr) {
+
+        ListQuintMsg *rcvListQuintMsg = check_and_cast<ListQuintMsg *>(msg);
+        // if received List Quintuplets from sink of my cluster
+        if (strcmp("Sending back List Quintuplets from my cluster sink", rcvListQuintMsg->getMsgContent()) == 0){
+            EV << "I received quintuplets" << endl;
+
+
+            int arraySize = rcvListQuintMsg->getDatasArraySize();
+
+            // Read all values in the datas[] array
+            for (int i = 0; i < arraySize; ++i) {
+                carListFromMySink.push_back(rcvListQuintMsg->getDatas(i));
+
+            }
+
+            // destructure the char List
+            if(!carListFromMySink.empty()){
+                std::pair<std::list<std::list<int>>, std::list<std::list<int>>> pairQuintuplets = destructureListCharQuint(carListFromMySink);
+
+                // Extract the results
+                quintupletsListEmission = pairQuintuplets.first;
+                quintupletsListReception = pairQuintuplets.second;
+
+                EV << "Emission *** " << endl;
+                for (const auto& quintuplet : quintupletsListEmission) {
+                    EV << "{";
+                    for (const int node : quintuplet) {
+                        EV << node << ",";
+                    }
+                    EV<< "}" << endl;
+                }
+
+                EV << "Reception *** " << endl;
+
+                for (const auto& quintuplet : quintupletsListReception) {
+                    EV << "{";
+                    for (const int node : quintuplet) {
+                        EV << node << ",";
+                    }
+                    EV<< "}" << endl;
+                }
+
+                EV << endl;
+                EV << endl;
+
+            }
+
+        }
+
     }
     //ASSERT(msg == endTxEvent);
 }
@@ -309,10 +397,12 @@ void Host::refreshDisplay() const
 }
 
 void Host::showPacketsToSend(){
-    EV << getName() << getIndex() << " : " << getId() << " :Packets Ill send :: ";
+    EV << getName() << getIndex() << " : " << getId() << " { ";
     for (auto it = listOfPacketToSend.begin(); it != listOfPacketToSend.end(); ++it) {
-        EV << *it << " -- "; // Log each element
+        EV << *it << " , "; // Log each element
     }
+
+    EV << "}";
 }
 
 void Host::generatePacketsToSend(){
@@ -360,14 +450,101 @@ void Host::mySchduleAt(simtime_t delay, char message[]){
     scheduleAt(simTime()  + delay, msgToSend);
 }
 
-void Host::finish()
-{
-    EV << "Contents of Hosts Neighbors IdList in " << getName() << getIndex() << " : ";
-    for (auto it = hostNeighborsIdList.begin(); it != hostNeighborsIdList.end(); ++it) {
-        EV << *it << " -- "; // Log each element
+
+std::pair<std::list<std::list<int>>, std::list<std::list<int>>> Host::destructureListCharQuint(const std::list<char>& listChar) {
+    std::list<std::list<int>> quintupletsList;
+    std::list<std::list<int>> quintupletsListRecep;
+
+    auto it = listChar.begin();
+
+    // Function to parse a quintuplet list
+    auto parseQuintuplets = [&it, &listChar]() -> std::list<std::list<int>> {
+        std::list<std::list<int>> quintuplets;
+        while (it != listChar.end() && *it != ']') {
+            if (*it == '{') {
+                std::list<int> quintuplet;
+                ++it;
+                while (it != listChar.end() && *it != '}') {
+                    quintuplet.push_back(static_cast<int>(*it));
+                    ++it;
+                }
+                if (it != listChar.end() && *it == '}') {
+                    ++it;
+                }
+                quintuplets.push_back(quintuplet);
+            } else {
+                ++it;
+            }
+        }
+        if (it != listChar.end() && *it == ']') {
+            ++it;
+        }
+        return quintuplets;
+    };
+
+    // Parse the first quintuplet list
+    if (it != listChar.end() && *it == '[') {
+        ++it;
+        quintupletsList = parseQuintuplets();
     }
 
-    EV << endl;
+    // Skip the '+' character
+    if (it != listChar.end() && *it == '+') {
+        ++it;
+    }
+
+    // Parse the second quintuplet list
+    if (it != listChar.end() && *it == '[') {
+        ++it;
+        quintupletsListRecep = parseQuintuplets();
+    }
+
+    return std::make_pair(quintupletsList, quintupletsListRecep);
+}
+
+void Host::mySchduleRountAPacketAt(simtime_t delay, char message[], int packetIdToSend, int sinkReceiverId){
+    char datas[] = "Ids";
+    PocMsg *msgToSend = generateMessage(message, getId());
+
+    msgToSend->setSource(sinkReceiverId);
+    msgToSend->setDestination(packetIdToSend);
+    scheduleAt(simTime()  + delay, msgToSend->dup());
+}
+
+void Host::sendOnePacketToNode(int packetIdToSend, int sinkReceiverId){
+
+    cModule *target = getSimulation()->getModule(sinkReceiverId); // the sink receiver at external cluster
+
+    ListHostMsg *listHostMsg;
+    char msgSendExternalPackets[] = "Sending 1 packet to node";
+    listHostMsg = new ListHostMsg(msgSendExternalPackets);
+    listHostMsg->setMsgContent(msgSendExternalPackets);
+    listHostMsg->setSource(getId());
+    listHostMsg->setDestination(packetIdToSend); // the final destination in the cluster
+
+
+    sendDirect(listHostMsg->dup(), target, "in");
+}
+
+int Host::getValueAtListPosition(std::list<int>& list, size_t position){
+    if (position >= list.size()) {
+        throw std::out_of_range("Position is out of range");
+    }
+
+    auto it = list.begin();
+    std::advance(it, position); // Move the iterator to the desired position
+    return *it;
+}
+
+
+void Host::finish()
+{
+    EV << getName() << getIndex() << " Received packets -------- {";
+    for (auto it = packetsReceivedList.begin(); it != packetsReceivedList.end(); ++it) {
+        EV << *it << ", "; // Log each element
+    }
+    EV << "}" << endl;
+
 }
 
 

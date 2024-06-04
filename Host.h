@@ -4,6 +4,13 @@
 #include "pocMsg_m.h"
 #include <omnetpp.h>
 #include "ListHostMsg_m.h"
+#include "ListQuintMsg_m.h"
+#include <list>
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <map>
+
 
 using namespace omnetpp;
 
@@ -61,6 +68,11 @@ class Host : public cSimpleModule
     int numbPacketToSend;
     std::list<int> allHostsIdList;
     std::list<int> listOfPacketToSend;
+    std::list<char> carListFromMySink; // list structured by my cluster sink to concat list quintuplets Em & Recep to send to each sink in the network fo external routing
+    std::list<std::list<int>> quintupletsListEmission;
+    std::list<std::list<int>> quintupletsListReception;
+    std::list<int> packetsReceivedList;
+
 
   public:
     Host();
@@ -78,6 +90,13 @@ class Host : public cSimpleModule
     virtual int getValueAtIndex(int index);
     virtual void showPacketsToSend();
     virtual void mySchduleAt(simtime_t delay, char message[]);
+    std::pair<std::list<std::list<int>>, std::list<std::list<int>>> destructureListCharQuint(const std::list<char>& listChar);
+    void mySchduleRountAPacketAt(simtime_t delay, char message[], int packetIdToSend, int sinkReceiverId);
+    void sendOnePacketToNode(int packetIdToSend, int sinkReceiverId);
+    int getValueAtListPosition(std::list<int>& list, size_t position);
+
+
+
 };
 
 }; //namespace

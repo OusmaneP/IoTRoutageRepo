@@ -8,20 +8,20 @@
 #ifndef GRAPHSTRUCTURE_H_
 #define GRAPHSTRUCTURE_H_
 
-#include<iostream>
-#include<list>
-#include<map>
+#include <iostream>
+#include <list>
+#include <map>
 #include <vector>
+#include <set>
 #include <algorithm>
 using namespace std;
 
 class GraphStructure {
     map<int, bool> visitedNodes;
     map<int, list<int>> adjacencyList;
-    list<list<int>> circuitList; //The list of circuits
-    list<int> circuit; // one circuit
-
-
+    list<list<int>> cycleList;  // The list of cycles
+    list<list<int>> pathList;   // The list of remaining paths
+    list<int> stack;            // Stack to track the current path/cycle
 
     public:
         GraphStructure();
@@ -31,7 +31,14 @@ class GraphStructure {
         void DFS(int startNode);
         map<int, list<int>> getAdjancyList();
         list<list<int>> getCircuitList();
+        list<list<int>> getPathList();
 
+        void findAndRemoveCycles(int startNode, int currentNode);
+        void findAndRemovePaths(int currentNode);
+        void traverseGraph() ;
+        void myCircuits(int debut, int firstValue);
+
+        list<list<int>> buildQuintupletsFromCircuitsList(list<list<int>> circuitList);
 
 };
 

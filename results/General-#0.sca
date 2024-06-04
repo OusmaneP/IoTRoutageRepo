@@ -1,14 +1,14 @@
 version 2
-run General-0-20240524-18:04:06-8390
+run General-0-20240604-19:33:16-1008
 attr configname General
-attr datetime 20240524-18:04:06
+attr datetime 20240604-19:33:16
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network pocSimulation
-attr processid 8390
+attr processid 1008
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -40,7 +40,7 @@ param **.sink4.sinkY 3*SbHeight/4
 param **.sinkID 0
 param **.host[*].numbPacketToSend "intuniform(3, 6)"
 
-scalar pocSimulation.sink1 duration 0.099172155333
+scalar pocSimulation.sink1 duration 0.09917215594
 statistic pocSimulation.sink1 collisionLength:histogram
 field count 0
 field mean nan
@@ -82,7 +82,7 @@ attr title "channel utilization, last"
 scalar pocSimulation.sink1 receivedFrames:last 0
 attr source sum(receive)
 attr title "received frames, last"
-scalar pocSimulation.sink2 duration 0.099172155333
+scalar pocSimulation.sink2 duration 0.09917215594
 statistic pocSimulation.sink2 collisionLength:histogram
 field count 0
 field mean nan
@@ -124,7 +124,7 @@ attr title "channel utilization, last"
 scalar pocSimulation.sink2 receivedFrames:last 0
 attr source sum(receive)
 attr title "received frames, last"
-scalar pocSimulation.sink3 duration 0.099172155333
+scalar pocSimulation.sink3 duration 0.09917215594
 statistic pocSimulation.sink3 collisionLength:histogram
 field count 0
 field mean nan
@@ -166,7 +166,7 @@ attr title "channel utilization, last"
 scalar pocSimulation.sink3 receivedFrames:last 0
 attr source sum(receive)
 attr title "received frames, last"
-scalar pocSimulation.sink4 duration 0.099172155333
+scalar pocSimulation.sink4 duration 0.09917215594
 statistic pocSimulation.sink4 collisionLength:histogram
 field count 0
 field mean nan

@@ -36,11 +36,13 @@ OBJS = \
     $O/Host.o \
     $O/Server.o \
     $O/listHostMsg_m.o \
+    $O/listQuintMsg_m.o \
     $O/pocMsg_m.o
 
 # Message files
 MSGFILES = \
     listHostMsg.msg \
+    listQuintMsg.msg \
     pocMsg.msg
 
 # SM files

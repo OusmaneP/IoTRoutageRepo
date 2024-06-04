@@ -77,6 +77,20 @@ namespace pocSimulation {
             // schedule send External Ids to sink1
             mySchduleAt(0.099172155333, "WakeUp and Send External Ids to Sink 1");
 
+            // schedule sink1 to compute graph, cycles, paths, and quintuplets
+            if (strcmp("sink1", getName()) == 0) {
+                mySchduleAt(0.099172155341, "WakeUp Sink 1, And compute graph...");
+            }
+
+            // schedule External Routing t=0.099172155341
+            mySchduleAt(0.099172155644, "WakeUp four External Routing");
+
+            // schedule each sink in cluster to compute graph 0.099172155696
+            mySchduleAt(0.099172155755, "WakeUp each sink in cluster to compute graph");
+
+            // schedule each node for internal routing. 0.099172155755
+            mySchduleAt(0.099172155844, "WakeUp each node in cluster to route internal");
+
 
         }
 
@@ -142,7 +156,8 @@ namespace pocSimulation {
                     // Diffusion Host Ids
                 else if (strcmp("broadcasting hosts Ids", ttmsg->getMsgContent()) == 0) {
 
-                    EV << "Im ready to send the hosts Ids : " << sinkName << endl;
+                    EV << endl;
+                    EV << sinkName  << " is ready to send the hosts Ids of cluster to : " << endl;
                     // put ids in the Msg array
                     listHostMsg->setDatasArraySize(HostsIdList.size());
                     int indexArray = 0;
@@ -163,7 +178,7 @@ namespace pocSimulation {
                         const char *moduleName = module->getName();
                         if ((strncmp(moduleName, "sink", 4) == 0) && (strcmp(moduleName, getName()) != 0)) {
                             // Module name starts with "sink"
-                            EV << "Module name starts with 'sink': " << moduleName << endl;
+                            EV << "---------------------------------- " << moduleName << endl;
 
                             // Send Ids Msg
                             listHostMsg->setDestination(module->getId());
@@ -180,12 +195,12 @@ namespace pocSimulation {
                         ++iter;
                     }
 
-
+                    EV << endl;
 
 
                 }
                 else if (strcmp("WakeUp and Send External Ids to Sink 1", ttmsg->getMsgContent()) == 0) {
-                    EV << "Waking Up and Send External Ids to Sink 1" << endl;
+                    EV << "Waking Up and Sending External Ids to Sink 1" << endl;
 
                     cModule *target = getParentModule()->getSubmodule("sink1");
 
@@ -205,21 +220,100 @@ namespace pocSimulation {
                     listHostMsg->setDestination(target->getId());
                     sendDirect(listHostMsg->dup(), target, "in");
                 }
+                else if (strcmp("WakeUp Sink 1, And compute graph...", ttmsg->getMsgContent()) == 0) {
+                    if (strcmp("sink1", getName()) == 0) {
 
-                if (strcmp("sendingId to server", ttmsg->getMsgContent()) == 0){
-                    if (numberOfMessagesForInitialization <= numberOfHosts) {
-                        HostsIdList.push_back(ttmsg->getSource());
-                        numberOfMessagesForInitialization = numberOfMessagesForInitialization+1;
-                        EV << "Received packet from " << ttmsg->getSource() << "\n";
+                        EV << endl;
+                        EV << endl;
+                        EV << sinkName << " Wake up Compute graph *** *** *** *** " << endl;
+
+                        char msgSendExternalPackets[] = "Sending back List Quintuplets from sink1";
+
+                        computeGraphCircuitsPaths(msgSendExternalPackets, graphMultiCanalSink1);
                     }
                 }
+                // wake up to rout external packets
+                else if (strcmp("WakeUp four External Routing", ttmsg->getMsgContent()) == 0) {
+                    EV << getName() << " Woke up for external Routing " << endl;
+
+                    if(!quintupletsListEmExternalP.empty()){
+                        for (auto& quintuplet : quintupletsListEmExternalP) {
+                            // schedule a wake up to rout an external packet
+                            int sinkReceiverId = getValueAtListPosition(quintuplet, 1);
+                            int slot = getValueAtListPosition(quintuplet, 2);
+
+                            bool foundPacket = false;
+                            int position = 0;
+
+                            while (!foundPacket && position < listExternalPackets.size()){
+                                int packetIdToSend = getValueAtListPosition(listExternalPackets, position);
+
+                                if(HostsIdMapExternal[packetIdToSend] == sinkReceiverId){
+                                    foundPacket = true;
+                                    // remove packet from List[current]
+                                    auto yt = std::find(listExternalPackets.begin(), listExternalPackets.end(), packetIdToSend);
+                                    if (yt != listExternalPackets.end()) {
+                                        // Remove the element at the iterator position
+                                        listExternalPackets.erase(yt);
+                                    }
+
+                                    EV << getName() << " will send packet of " << packetIdToSend << " to " << sinkReceiverId << endl;
+//                                    sendOnePacketToSink(packetIdToSend, sinkReceiverId);
+                                    simtime_t routDelay = 0.000000000002 * slot;
+                                    char message[] = "message route on packet to a sink";
+                                    mySchduleRountAPacketAt(routDelay , message, packetIdToSend, sinkReceiverId);
+                                }
+                                position++;
+                            }
+
+                        }
+                    }
+                }
+                // wake up and route one external packets
+                else if (strcmp("message route on packet to a sink", ttmsg->getMsgContent()) == 0) {
+                    sendOnePacketToSink(ttmsg->getDestination(), ttmsg->getSource()); //packetIdToSend  , sinkReceiverId
+                }
+                // WakeUp each sink in cluster to compute graph
+                else if (strcmp("WakeUp each sink in cluster to compute graph", ttmsg->getMsgContent()) == 0) {
+                    char msgSendExternalPackets[] = "Sending back List Quintuplets from my cluster sink";
+
+                    computeGraphCircuitsPaths(msgSendExternalPackets, graph);
+                }
+                else if (strcmp("WakeUp each node in cluster to route internal", ttmsg->getMsgContent()) == 0) {
+                    EV << getName() << " Woke up for internal Routing " << endl;
+
+                    if(!quintupletsListEmission.empty()){
+                        for (auto& quintuplet : quintupletsListEmission) {
+                            // schedule a wake up to rout an external packet
+                            int nodeReceiverId = getValueAtListPosition(quintuplet, 1);
+                            int slot = getValueAtListPosition(quintuplet, 2);
+
+                            EV << getName() << " will send a packet to " << nodeReceiverId << endl;
+                            simtime_t routDelay = 0.000000000002 * slot;
+                            char message[] = "message route one packet to a node";
+                            mySchduleRountAPacketAt(routDelay , message, nodeReceiverId, nodeReceiverId);
+                        }
+                    }
+                }
+                else if (strcmp("message route one packet to a node", ttmsg->getMsgContent()) == 0) {
+                    sendOnePacketToSink(ttmsg->getDestination(), ttmsg->getSource());
+                }
+
+
+//                if (strcmp("sendingId to server", ttmsg->getMsgContent()) == 0){
+//                    if (numberOfMessagesForInitialization <= numberOfHosts) {
+//                        HostsIdList.push_back(ttmsg->getSource());
+//                        numberOfMessagesForInitialization = numberOfMessagesForInitialization+1;
+//                        EV << "Received packet from " << ttmsg->getSource() << "\n";
+//                    }
+//                }
             }
 
             // Check if msg is of type ListHostMsg
             else if (dynamic_cast<ListHostMsg *>(msg) != nullptr) {
                 ListHostMsg *rcvListHostMsg = check_and_cast<ListHostMsg *>(msg);
 
-                // when sink receive external packets from hosts.
+                // when sink receive all packets including external from his cluster hosts.
                 if (strcmp("Send External Packets", rcvListHostMsg->getMsgContent()) == 0){
                     // Get the size of the datas[] array
                     int arraySize = rcvListHostMsg->getDatasArraySize();
@@ -240,7 +334,7 @@ namespace pocSimulation {
                     // when Receiving External Packets Ids to Sink1
                 else if (strcmp("Sending External Packets Ids to Sink1", rcvListHostMsg->getMsgContent()) == 0){
                     int arraySize = rcvListHostMsg->getDatasArraySize();
-                    EV << rcvListHostMsg->getSenderModule()->getName() << " Sent for External :: ";
+                    EV << rcvListHostMsg->getSenderModule()->getName() << " Has these External packets :: ";
 
                     // Read all values in the datas[] array and put them in HostsIdMapExternal
                     for (int i = 0; i < arraySize; ++i) {
@@ -248,17 +342,15 @@ namespace pocSimulation {
                         EV << hostId << " -- ";
 
                         if(isIdInList(hostId)){
-                            graph.addEdge(getId(), hostId);
                             graphMultiCanalSink1.addEdge(rcvListHostMsg->getSource(), getId());
                         }else{
                             auto it = HostsIdMapExternal.find(hostId);
 
                             if(it != HostsIdMapExternal.end()){
 
-                                const char *second = it->second.c_str();
+                                int secondSinkId = it->second;
 
-                                cModule *module = getParentModule()->getSubmodule(second);
-                                graphMultiCanalSink1.addEdge(rcvListHostMsg->getSource(), module->getId());
+                                graphMultiCanalSink1.addEdge(rcvListHostMsg->getSource(), secondSinkId);
 
                             }
 
@@ -269,6 +361,14 @@ namespace pocSimulation {
 
                     EV << endl;
                 }
+                // when receive one packet from external sink
+                else if (strcmp("Sending 1 packet to destination sink", rcvListHostMsg->getMsgContent()) == 0) {
+                    EV << getName() << " Id : " << getId() << " Received one packet from external sink with id : " << rcvListHostMsg->getSource() << endl;
+                    int packetReceived = rcvListHostMsg->getDestination();
+                    graph.addEdge(getId(), packetReceived);
+
+                }
+                // when a sink receives host ids of external nodes
                 else{
 
                     EV << getName() << " : Received from : " << rcvListHostMsg->getMsgContent() << endl;
@@ -281,7 +381,11 @@ namespace pocSimulation {
                         for (int i = 0; i < arraySize; ++i) {
                             int hostId = rcvListHostMsg->getDatas(i);
                             EV << hostId << " -- ";
-                            HostsIdMapExternal[hostId] = rcvListHostMsg->getMsgContent();
+
+                            cModule *module = getParentModule()->getSubmodule(rcvListHostMsg->getMsgContent());
+
+                            HostsIdMapExternal[hostId] = module->getId();
+
                         }
                         EV << endl;
                     } else {
@@ -291,6 +395,105 @@ namespace pocSimulation {
 
                 }
             }
+            // Check if msg is of type List Quintuplets Msg
+            else if (dynamic_cast<ListQuintMsg *>(msg) != nullptr) {
+                ListQuintMsg *rcvListQuintMsg = check_and_cast<ListQuintMsg *>(msg);
+
+                // if  received List Quintuplets from sink1
+                if (strcmp("Sending back List Quintuplets from sink1", rcvListQuintMsg->getMsgContent()) == 0){
+                    EV << endl;
+                    EV << getName() << " received Quintuplets from SB : " << rcvListQuintMsg->getSource() << endl;
+
+                    int arraySize = rcvListQuintMsg->getDatasArraySize();
+
+                    // Read all values in the datas[] array
+                    for (int i = 0; i < arraySize; ++i) {
+                        carListFromSB.push_back(rcvListQuintMsg->getDatas(i));
+
+                    }
+
+                    // destructure the char List
+                    if(!carListFromSB.empty()){
+                        std::pair<list<list<int>>, list<list<int>>> pairQuintuplets = destructureListCharQuint(carListFromSB);
+
+                        // Extract the results
+                        quintupletsListEmExternalP = pairQuintuplets.first;
+                        quintupletsListRecepExternalP = pairQuintuplets.second;
+
+                        for (const auto& quintuplet : quintupletsListEmExternalP) {
+                            EV << "{";
+                            for (const int node : quintuplet) {
+                                EV << node << ",";
+                            }
+                            EV<< "}" << endl;
+                        }
+                        EV << endl;
+                        EV << "Reception *** " << endl;
+                        EV << endl;
+
+                        for (const auto& quintuplet : quintupletsListRecepExternalP) {
+                            EV << "{";
+                            for (const int node : quintuplet) {
+                                EV << node << ",";
+                            }
+                            EV<< "}" << endl;
+                        }
+
+                        EV << endl;
+                        EV << endl;
+                        EV << endl;
+
+                    }
+
+                }
+                // if received List Quintuplets from me for routing in my cluster
+                else if (strcmp("Sending back List Quintuplets from my cluster sink", rcvListQuintMsg->getMsgContent()) == 0){
+                    EV << "I received quintuplets" << endl;
+
+
+                    int arraySize = rcvListQuintMsg->getDatasArraySize();
+
+                    // Read all values in the datas[] array
+                    for (int i = 0; i < arraySize; ++i) {
+                        carListFromMySink.push_back(rcvListQuintMsg->getDatas(i));
+
+                    }
+
+                    // destructure the char List
+                    if(!carListFromMySink.empty()){
+                        std::pair<std::list<std::list<int>>, std::list<std::list<int>>> pairQuintuplets = destructureListCharQuint(carListFromMySink);
+
+                        // Extract the results
+                        quintupletsListEmission = pairQuintuplets.first;
+                        quintupletsListReception = pairQuintuplets.second;
+
+                        EV << "Emission *** " << endl;
+                        for (const auto& quintuplet : quintupletsListEmission) {
+                            EV << "{";
+                            for (const int node : quintuplet) {
+                                EV << node << ",";
+                            }
+                            EV<< "}" << endl;
+                        }
+
+                        EV << "Reception *** " << endl;
+
+                        for (const auto& quintuplet : quintupletsListReception) {
+                            EV << "{";
+                            for (const int node : quintuplet) {
+                                EV << node << ",";
+                            }
+                            EV<< "}" << endl;
+                        }
+
+                        EV << endl;
+                        EV << endl;
+
+                    }
+
+                }
+            }
+
         }
 
         PocMsg *Server::generateMessage(char msgname[], int dest, char  items[])
@@ -336,67 +539,389 @@ namespace pocSimulation {
             scheduleAt(simTime()  + delay, msgToSend);
         }
 
-        void Server::finish()
-        {
-            if (strcmp("sink1", getName()) == 0) {
+        void Server::setValueAtListPosition(std::list<int>& list, size_t position, int newVal) {
+            if (position >= list.size()) {
+                throw std::out_of_range("Position is out of range");
+            }
+
+            auto it = list.begin();
+            std::advance(it, position); // Move the iterator to the desired position
+            *it = newVal; // Update the value
+        }
+
+        int Server::getValueAtListPosition(std::list<int>& list, size_t position){
+            if (position >= list.size()) {
+                throw std::out_of_range("Position is out of range");
+            }
+
+            auto it = list.begin();
+            std::advance(it, position); // Move the iterator to the desired position
+            return *it;
+        }
+
+        list<char> Server::structureListQuintuplets(list<list<int>> quintupletsList, list<list<int>> quintupletsListRecep){
+            list<char> listChar;
+
+            // quint emission
+            listChar.push_back('[');
+            for (const auto& quintuplet : quintupletsList) {
+
+                listChar.push_back('{');
+                for (const int node : quintuplet) {
+                    listChar.push_back(static_cast<char>(node));
+                }
+                listChar.push_back('}');
+            }
+            listChar.push_back(']');
 
 
-                map<int, list<int>> adjacencyList = graphMultiCanalSink1.getAdjancyList();
+            // quint Reception
+            listChar.push_back('+');
+            listChar.push_back('[');
+            for (const auto& quintuplet : quintupletsListRecep) {
 
-                    // Iterate over each node in the adjacency list
-                    for (const auto& pair : adjacencyList) {
-                        int node = pair.first;
-                        const list<int>& neighbors = pair.second;
+                listChar.push_back('{');
+                for (const int node : quintuplet) {
+                    listChar.push_back(static_cast<char>(node));
+                }
+                listChar.push_back('}');
+            }
+            listChar.push_back(']');
 
-                        // Print the node and its neighbors
-                        EV << "Node " << node << " neighbors: ";
-                        for (int neighbor : neighbors) {
-                            EV << neighbor << " ";
+            return listChar;
+
+        }
+
+        void Server::sendBackQuintToSinks(char msgSendExternalPackets[], list<char> charList, int sinkReceiverId){
+            cModule *target = getSimulation()->getModule(sinkReceiverId);
+
+            ListQuintMsg *listQuintMsg;
+            listQuintMsg = new ListQuintMsg(msgSendExternalPackets);
+            listQuintMsg->setMsgContent(msgSendExternalPackets);
+            listQuintMsg->setSource(getId());
+            listQuintMsg->setDestination(sinkReceiverId);
+
+            listQuintMsg->setDatasArraySize(charList.size());
+            int indexArray = 0;
+            for (auto it = charList.begin(); it != charList.end(); ++it) {
+                listQuintMsg->setDatas(indexArray, *it);
+                indexArray++;
+            }
+
+
+            sendDirect(listQuintMsg->dup(), target, "in");
+        }
+
+        std::pair<std::list<std::list<int>>, std::list<std::list<int>>> Server::destructureListCharQuint(const std::list<char>& listChar) {
+            std::list<std::list<int>> quintupletsList;
+            std::list<std::list<int>> quintupletsListRecep;
+
+            auto it = listChar.begin();
+
+            // Function to parse a quintuplet list
+            auto parseQuintuplets = [&it, &listChar]() -> std::list<std::list<int>> {
+                std::list<std::list<int>> quintuplets;
+                while (it != listChar.end() && *it != ']') {
+                    if (*it == '{') {
+                        std::list<int> quintuplet;
+                        ++it;
+                        while (it != listChar.end() && *it != '}') {
+                            quintuplet.push_back(static_cast<int>(*it));
+                            ++it;
                         }
-                        EV << endl;
-                    }
-
-                    graphMultiCanalSink1.DFS(2);
-                    graphMultiCanalSink1.DFS(3);
-                    graphMultiCanalSink1.DFS(4);
-                    graphMultiCanalSink1.DFS(5);
-
-                    list<list<int>> circuitList = graphMultiCanalSink1.getCircuitList();
-
-                    // Iterate over each circuit in the circuit list
-                    for (const auto& circuit : circuitList) {
-                        // Print the circuit
-                        EV << "Circuit: ";
-                        for (int node : circuit) {
-                            EV << node << "-";
+                        if (it != listChar.end() && *it == '}') {
+                            ++it;
                         }
-                        EV << endl;
+                        quintuplets.push_back(quintuplet);
+                    } else {
+                        ++it;
                     }
+                }
+                if (it != listChar.end() && *it == ']') {
+                    ++it;
+                }
+                return quintuplets;
+            };
 
+            // Parse the first quintuplet list
+            if (it != listChar.end() && *it == '[') {
+                ++it;
+                quintupletsList = parseQuintuplets();
+            }
+
+            // Skip the '+' character
+            if (it != listChar.end() && *it == '+') {
+                ++it;
+            }
+
+            // Parse the second quintuplet list
+            if (it != listChar.end() && *it == '[') {
+                ++it;
+                quintupletsListRecep = parseQuintuplets();
+            }
+
+            return std::make_pair(quintupletsList, quintupletsListRecep);
+        }
+
+        void Server::sendOnePacketToSink(int packetIdToSend, int sinkReceiverId){
+
+            cModule *target = getSimulation()->getModule(sinkReceiverId); // the sink receiver at external cluster
+
+            ListHostMsg *listHostMsg;
+            char msgSendExternalPackets[] = "Sending 1 packet to destination sink";
+            listHostMsg = new ListHostMsg(msgSendExternalPackets);
+            listHostMsg->setMsgContent(msgSendExternalPackets);
+            listHostMsg->setSource(getId());
+            listHostMsg->setDestination(packetIdToSend); // the final destination in the cluster
+
+
+            sendDirect(listHostMsg->dup(), target, "in");
+        }
+
+        void Server::computeGraphCircuitsPaths(char msgSendExternalPackets[], GraphStructure graphStructure){
+
+            // adjacency List
+            map<int, list<int>> adjacencyList = graphStructure.getAdjancyList();
+            // Iterate over each node in the adjacency list
+            for (const auto& pair : adjacencyList) {
+                int node = pair.first;
+                const list<int>& neighbors = pair.second;
+
+                                    // Print the node and its neighbors
+                EV << "Node " << node << " { ";
+                for (int neighbor : neighbors) {
+                    EV << neighbor << ",";
+                }
+                EV << "}";
+                EV << endl;
+            }
+
+
+            // Traverse Graph, compute circuits, paths ...
+            graphStructure.traverseGraph();
+
+
+            // get Circuits List, and Paths
+            list<list<int>> circuitList = graphStructure.getCircuitList();
+            // Iterate over each circuit in the circuit list
+            for (const auto& circuit : circuitList) {
+                                    // Print the circuit
+                EV << "Circuit: ";
+                for (int node : circuit) {
+                    EV << node << "-";
+                }
+                EV << endl;
+            }
+
+
+            // get empty Adjacency List
+            map<int, list<int>> adjacencyList2 = graphStructure.getAdjancyList();
+            // Display empty adjacency list
+            for (const auto& pair : adjacencyList2) {
+                int node = pair.first;
+                const list<int>& neighbors = pair.second;
+
+                                    // Print the node and its neighbors
+                EV << "Node " << node << " { ";
+                for (int neighbor : neighbors) {
+                    EV << neighbor << ",";
+                }
+                EV << "}";
+                EV << endl;
+            }
+
+
+            // compute Quintuplets Emission
+            list<list<int>> quintupletsList = graphStructure.buildQuintupletsFromCircuitsList(circuitList);
+
+            EV << endl;
+            EV << "****   Quintuplets Transmission   *****" << endl;
+            EV << endl;
+
+            // add slots
+
+            int slot = 1;
+            list<int> quintupletRecep;
+            list<list<int>> quintupletsListRecep;
+
+            for (auto& entry : adjacencyList2) {
+                for (auto& quintuplet : quintupletsList) {
+                    int firstNode = quintuplet.front();
+                    if(firstNode == entry.first){
+                        // change slot if multi channel
+                        if (strcmp("Sending back List Quintuplets from sink1", msgSendExternalPackets) == 0) {
+                            size_t position = 2;
+                            int newVal = slot;
+                            setValueAtListPosition(quintuplet, position, newVal);
+                        }
+
+
+                        // build reception quintuplet
+                        quintupletRecep.push_back(getValueAtListPosition(quintuplet, 1));     //receiver node
+                        quintupletRecep.push_back(getValueAtListPosition(quintuplet, 0));     //emitter node
+                        if (strcmp("Sending back List Quintuplets from sink1", msgSendExternalPackets) == 0) {
+                            quintupletRecep.push_back(slot);     //slot number for multi channel
+                        }else{
+                            quintupletRecep.push_back(getValueAtListPosition(quintuplet, 2));     //slot number
+                        }
+
+                        quintupletRecep.push_back(1);        // 1 for reception
+                        quintupletRecep.push_back(getValueAtListPosition(quintuplet, 4));     // receiver channel
+                        quintupletsListRecep.push_back(quintupletRecep);
+
+
+
+                        slot++;
+                        quintupletRecep.clear();
+                    }
+                }
+                slot = 1;
+            }
+
+            for (const auto& quintuplet : quintupletsList) {
+                                    // Print the circuit
+                EV << "Quintuplet: {";
+                for (int node : quintuplet) {
+                    EV << node << ",";
+                }
+                EV << "}" << endl;
+            }
+
+            EV << endl;
+            EV << "****   Quintuplets Reception   *****" << endl;
+            EV << endl;
+
+            for (const auto& quintuplet : quintupletsListRecep) {
+                                    // Print the circuit
+                EV << "Quintuplet Recep: {";
+                for (int node : quintuplet) {
+                    EV << node << ",";
+                }
+                EV << "}" << endl;
+            }
+
+
+            // send back Quintuplets to every node.
+            for (auto& entry : adjacencyList) {
+                list<list<int>> OneSinkquintupletsListEmission;
+                list<list<int>> OneSinkquintupletsListReception;
+
+                for (auto& quintuplet : quintupletsList) {
+                    int firstNode = quintuplet.front();
+                    if(firstNode == entry.first){
+                        OneSinkquintupletsListEmission.push_back(quintuplet);
+                    }
+                }
+
+                for (auto& quintuplet : quintupletsListRecep) {
+                    int firstNode = quintuplet.front();
+                    if(firstNode == entry.first){
+                        OneSinkquintupletsListReception.push_back(quintuplet);
+                    }
+                }
+
+                list<char> charList = structureListQuintuplets(OneSinkquintupletsListEmission, OneSinkquintupletsListReception);
+
+                sendBackQuintToSinks(msgSendExternalPackets, charList, entry.first);
 
             }
+
+        }
+
+
+        void Server::receiveQuintupletsFromSink(ListQuintMsg *rcvListQuintMsg, list<char> carList, list<list<int>> quintupletsListEmission, list<list<int>> quintupletsListReception){
+
+            int arraySize = rcvListQuintMsg->getDatasArraySize();
+
+            // Read all values in the datas[] array and put it in a List
+            for (int i = 0; i < arraySize; ++i) {
+                carList.push_back(rcvListQuintMsg->getDatas(i));
+
+            }
+
+            // destructure the char List
+            if(!carList.empty()){
+                std::pair<list<list<int>>, list<list<int>>> pairQuintuplets = destructureListCharQuint(carList);
+
+                // Extract the results
+                quintupletsListEmission = pairQuintuplets.first;
+                quintupletsListReception = pairQuintuplets.second;
+
+                for (const auto& quintuplet : quintupletsListEmission) {
+                    EV << "{";
+                    for (const int node : quintuplet) {
+                        EV << node << ",";
+                    }
+                    EV<< "}" << endl;
+                }
+
+                EV << "Reception *** " << endl;
+
+                for (const auto& quintuplet : quintupletsListReception) {
+                    EV << "{";
+                    for (const int node : quintuplet) {
+                        EV << node << ",";
+                    }
+                    EV<< "}" << endl;
+                }
+
+                EV << endl;
+                EV << endl;
+                EV << endl;
+
+            }
+
+        }
+
+        void Server::mySchduleRountAPacketAt(simtime_t delay, char message[], int packetIdToSend, int sinkReceiverId){
+            char datas[] = "Ids";
+            PocMsg *msgToSend = generateMessage(message, getId(), datas);
+            msgToSend->setSource(sinkReceiverId);
+            msgToSend->setDestination(packetIdToSend);
+            scheduleAt(simTime()  + delay, msgToSend->dup());
+        }
+
+        void Server::finish()
+        {
 
             EV << "duration: " << simTime() << endl;
 
-            // Log the contents of HostsIdList using EV
-            EV << "Contents of HostsIdList in " << getName() << " : ";
-            for (auto it = HostsIdList.begin(); it != HostsIdList.end(); ++it) {
-                EV << *it << " -- "; // Log each element
-            }
+//            // adjacency List
+//            map<int, list<int>> adjacencyList = graph.getAdjancyList();
+//            // Iterate over each node in the adjacency list
+//            for (const auto& pair : adjacencyList) {
+//                int node = pair.first;
+//                const list<int>& neighbors = pair.second;
+//
+//                                    // Print the node and its neighbors
+//                EV << "Node " << node << " { ";
+//                for (int neighbor : neighbors) {
+//                    EV << neighbor << ",";
+//                }
+//                EV << "}";
+//                EV << endl;
+//            }
+//
 
-            EV << endl;
-
-            for (auto it = HostsIdMapExternal.begin(); it != HostsIdMapExternal.end(); ++it) {
-                int key = it->first;
-                std::string value = it->second;
-                // Do something with the key and value
-                EV << key << " :: " << value << endl;
-            }
-
-            EV << endl;
-            EV << endl;
-            EV << endl;
-            EV << endl;
+//            // Log the contents of HostsIdList using EV
+//            EV << "Contents of HostsIdList in " << getName() << " : ";
+//            for (auto it = HostsIdList.begin(); it != HostsIdList.end(); ++it) {
+//                EV << *it << " -- "; // Log each element
+//            }
+//
+//            EV << endl;
+//
+//            for (auto it = HostsIdMapExternal.begin(); it != HostsIdMapExternal.end(); ++it) {
+//                int key = it->first;
+//                int value = it->second;
+//                // Do something with the key and value
+//                EV << key << " :: " << value << endl;
+//            }
+//
+//            EV << endl;
+//            EV << endl;
+//            EV << endl;
+//            EV << endl;
             recordScalar("duration", simTime());
         }
 
